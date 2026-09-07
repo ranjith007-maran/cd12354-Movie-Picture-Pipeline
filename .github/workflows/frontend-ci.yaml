@@ -66,6 +66,10 @@ jobs:
       - lint
       - test
 
+    defaults:
+      run:
+        working-directory: starter/frontend
+
     env:
       REACT_APP_MOVIE_API_URL: http://localhost:5000
 
@@ -73,8 +77,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: CI=true npm test -- --watchAll=false --passWithNoTests
+
       - name: Build frontend Docker image
-        working-directory: starter/frontend
         run: |
           docker build \
             --build-arg REACT_APP_MOVIE_API_URL="${REACT_APP_MOVIE_API_URL}" \
